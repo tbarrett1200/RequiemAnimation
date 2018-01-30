@@ -1,0 +1,14 @@
+{
+  "name": "requiem-animation",
+  "version": "1.0.0",
+  "description": "Animates square images for CHS concert",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Thomas Barrett and Ozaner Hansha",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "electron": "^1.7.11"
+  }
+}
