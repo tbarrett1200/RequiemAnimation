@@ -1,28 +1,11 @@
-# RequiemAnimation
+# Requiem Concert Display
 
 # Requirements
-MUST display a an animated grid of square images
-MUST provide different image groups which display separately
-MUST toggle through the different images in the group
-MUST create visually stimulating animations between images
-
-SHOULD animated smoothly between different groups
-SHOULD provide randomized animations
-
-# Definitions
-
-## Groups:
-Collections of images with a common color theme. Images are displayed in a grid of squares with a 4x3 grid layout.
-
-## Group Transition
-When two groups transition, a new set of images and a new color theme is brought in the replace the old own. In this case, all squares are shifted to make room for the new ones.
-
-## Squares
-Come in small, medium, and large. Can either contain an image or a solid color.
-
-## Squares Transitions
-They are able to combine, fracture, and shift
-
+1. MUST display a an animated grid of square images
+2. MUST provide different image groups which display separately
+3. MUST toggle through the different images in the group
+4. MUST create visually stimulating random animations between images
+5. MUST animated smoothly between different groups
 
 # Basic Grid Design
 The screen is split into a 4x3 square grid. In each grid space, an image is centered and scaled to fill 90% of the grid space.
@@ -61,13 +44,12 @@ Prior to combining or fracturing, a square must first fade to a solid color, whi
 
 A square is allowed to color fade at any time, even when not combining or fracturing.
 
+# Dependencies
+* node.js
+* electron.js
+* anime.js
+
 # Build Instructions
 ```
 npm start
-```
-
-
-## API
-```js
-//
 ```
