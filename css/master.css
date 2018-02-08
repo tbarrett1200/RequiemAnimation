@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#screen {
+  width: 800px;
+  height: 600px;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+}
+
+div.block {
+  /*border: 1px solid #EFEFEF;*/
+  background: white;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+div.image {
+  position: absolute;
+  left: 1vw;
+  right: 1vw;
+  bottom: 1vw;
+  top: 1vw;
+  background: rgb(160, 209, 231);
+}
