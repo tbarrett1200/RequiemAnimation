@@ -1,78 +1,75 @@
 const anime = require('animejs')
+const Grid = require('./grid')
 const $ = require('jquery')
 const fs = require('fs')
+const path = require('path')
 
 let opts
-let imgnum = 0
-let grid = [[], [], []]
+let imgnum
+let grid
+let movement
+let images = [];
 
-function getRow (r) {
-  if (r > 2) console.log('overflow error')
-  return grid[r]
-}
-
-function getCol (c) {
-  if (c > 3) console.log('overflow error')
-  return [grid[0][c], grid[1][c], grid[2][c]]
-}
-
-function setRow (r, row) {
-  grid[r] = row
-}
-
-function setCol (c, col) {
-  grid[0][c] = col[0]
-  grid[1][c] = col[1]
-  grid[2][c] = col[2]
-}
-
-function getRowsWith (e) {
-  let rows = []
-  for (let r = 0; r < 3; r++) {
-    if (getRow(r).indexOf(e) !== -1) rows.push(r)
-  }
-  return rows
-}
-
-function getColsWith (e) {
-  let cols = []
-  for (let c = 0; c < 4; c++) {
-    if (getCol(c).indexOf(e) !== -1) cols.push(c)
-  }
-  return cols
-}
-
-function getLockedRows (r) {
-  let rows = new Set()
-  getRow(r).forEach(e => {
-    getRowsWith(e).forEach(r => rows.add(r))
-  })
-  return Array.from(rows)
-}
-
-function getLockedCols (c) {
-  let cols = new Set()
-  getCol(c).forEach(e => {
-    getColsWith(e).forEach(r => cols.add(r))
-  })
-  return Array.from(cols)
-}
-
-(function main () {
+(async function main () {
   loadOptions()
-  initializeGrid()
-  loop()
+  for (movement = 0; movement < 14; movement++) {
+    await nameAction(opts.movements[movement])
+    await initGrid()
+    await loop()
+    await deinitGrid()
+  }
 })()
 
-function loadOptions () {
+async function nameAction (name) {
+  try {
+    let nameElement = $(`<h1 class='title'>${name}</h1>`)
+    $('#screen').append(nameElement)
+
+    // Wrap every letter in a span
+    $('.title').each(function () {
+      $(this).html($(this).text().replace(/(\w)/g, "<span class='letter'>$&</span>"))
+    })
+
+    await anime({
+      targets: '.title .letter',
+      opacity: [0, 1],
+      easing: 'easeInOutQuad',
+      duration: 2250,
+      delay: function (el, i) {
+        return 150 * (i + 1)
+      }
+    }).finished
+    await anime({
+      targets: '.title',
+      opacity: 0,
+      duration: 1000,
+      easing: 'easeOutExpo',
+      delay: 1000
+    }).finished
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function loadOptions () {
   opts = JSON.parse(fs.readFileSync('options.json'))
+  console.log(opts)
+  opts.movements.forEach((m, i) => {
+    images.push([])
+    fs.readdirSync(`img/${i}`).forEach(img => {
+      if (path.extname(img) === '.jpg') {
+        images[i].push(`img/${i}/${img}`)
+      }
+    })
+  })
+  console.log(images)
 }
 
 function makeSquare (row, col, roff = 0, coff = 0, scale = 1) {
   let num = imgnum++
   for (let r = 0; r < scale; r++) {
     for (let c = 0; c < scale; c++) {
-      grid[row + r][col + c] = num
+      grid.grid[row + r][col + c] = num
     }
   }
 
@@ -89,31 +86,54 @@ function makeSquare (row, col, roff = 0, coff = 0, scale = 1) {
   let image = $('<div class="image">')
   image.css({
     'background': opts.gridColor,
-    'background-image': `url("img/${imgnum % 11}.jpg")`,
+    'background-image': `url(${images[movement][imgnum % images[movement].length]})`,
     'background-position': `${anime.random(0, 80)}% ${anime.random(0, 80)}%`
   })
 
   return block.append(image)
 }
 
-function initializeGrid () {
+async function initGrid () {
+  imgnum = 0
+  grid = new Grid(3, 4)
+  $('#screen').css('opacity', 0)
   for (let r = 0; r < opts.rows; r++) {
     for (let c = 0; c < opts.cols; c++) {
       $('#screen').append(makeSquare(r, c))
     }
   }
+  await anime({
+    targets: '#screen',
+    opacity: 1,
+    duration: 4000,
+    easing: 'easeInOutQuad'
+  }).finished
+}
+
+async function deinitGrid () {
+  await fadeOut()
+  $('#screen').empty()
+}
+
+async function fadeOut () {
+  await anime({
+    targets: '.block',
+    opacity: 0,
+    duration: 2000,
+    easing: 'easeInOutQuad'
+  }).finished
 }
 
 function createCol (cols, direction) {
   let big = true
-  cols.forEach(col => setCol(col, []))
+  cols.forEach(col => grid.col(col, []))
   cols.forEach(col => {
     for (let row = 0; row < 3; row++) {
-      if (!grid[row][col]) {
-        if (big && anime.random(0, 1) === 0 && row < 2 && col < cols[cols.length - 1]) {
+      if (!grid.grid[row][col]) {
+        if (big && anime.random(0, 2) === 0 && row < 2 && col < cols[cols.length - 1]) {
           big = false
           $('#screen').append(makeSquare(row, col, -direction * opts.rows, 0, 2))
-        } else if (big && anime.random(0, 1) === 0 && row < 1 && col < cols[cols.length - 2]) {
+        } else if (big && anime.random(0, 1) === 0 && cols.length > 2 && row === 0 && col < 2) {
           big = false
           $('#screen').append(makeSquare(row, col, -direction * opts.rows, 0, 3))
         } else {
@@ -126,14 +146,14 @@ function createCol (cols, direction) {
 
 function createRow (rows, direction) {
   let big = true
-  rows.forEach(row => setRow(row, []))
+  rows.forEach(row => grid.row(row, []))
   rows.forEach(row => {
     for (let col = 0; col < 4; col++) {
-      if (!grid[row][col]) {
-        if (big && anime.random(0, 1) === 0 && row < rows[rows.length - 1] && col < opts.cols - 1) {
+      if (!grid.grid[row][col]) {
+        if (big && anime.random(0, 2) === 0 && row < rows[rows.length - 1] && col < opts.cols - 1) {
           big = false
           $('#screen').append(makeSquare(row, col, 0, -direction * opts.cols, 2))
-        } else if (big && anime.random(0, 1) === 0 && row < rows[rows.length - 2] && col < opts.cols - 2) {
+        } else if (big && anime.random(0, 1) === 0 && rows.length > 2 && row === 0 && col < 2) {
           big = false
           $('#screen').append(makeSquare(row, col, 0, -direction * opts.cols, 2))
         } else {
@@ -162,9 +182,11 @@ async function colAction (cols, dir) {
       duration: 2000,
       easing: 'easeInOutQuad'
     }).finished
-    await delay(1000)
+    await delay(2000)
     old.forEach(e => e.remove())
-  } catch (error) {}
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 async function rowAction (rows, dir) {
@@ -179,9 +201,11 @@ async function rowAction (rows, dir) {
       duration: 2000,
       easing: 'easeInOutQuad'
     }).finished
-    await delay(1000)
+    await delay(2000)
     old.forEach(e => e.remove())
-  } catch (error) {}
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 async function fadeAction () {
@@ -220,11 +244,11 @@ function range (start, end, step = 1) {
 
 async function randColAction () {
   let dir = 2 * anime.random(0, 1) - 1
-  let num = anime.random(1, opts.cols - 1)
+  let num = anime.random(3, opts.cols - 1)
   let col = anime.random(0, opts.cols - num)
   let all = range(col, col + num)
   all.slice(0).forEach(c => {
-    all.push(...getLockedCols(c))
+    all.push(...grid.lockedCols(c))
   })
   all = Array.from(new Set(all))
   await colAction(all, dir)
@@ -232,11 +256,11 @@ async function randColAction () {
 
 async function randRowAction () {
   let dir = 2 * anime.random(0, 1) - 1
-  let num = anime.random(1, opts.rows - 1)
+  let num = anime.random(2, opts.rows - 1)
   let row = anime.random(0, opts.rows - num)
   let all = range(row, row + num)
   all.slice(0).forEach(r => {
-    all.push(...getLockedRows(r))
+    all.push(...grid.lockedRows(r))
   })
   all = Array.from(new Set(all))
   await rowAction(all, dir)
@@ -246,17 +270,23 @@ async function randAction () {
   switch (anime.random(0, 1)) {
     case 0:
       await randColAction()
-      await fadeAction()
+      // await fadeAction()
+      console.log(grid.grid)
       break
     case 1:
       await randRowAction()
-      await fadeAction()
+      // await fadeAction()
+      console.log(grid.grid)
       break
   }
 }
 
 async function loop () {
   try {
-    while (true) await randAction()
+    let animate = true
+    $(document).keypress(() => {
+      animate = false
+    })
+    while (animate) await randAction()
   } catch (e) {}
 }

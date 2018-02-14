@@ -3,20 +3,18 @@
   "version": "1.0.0",
   "description": "Animates square images for CHS concert",
   "main": "main.js",
+  "productName": "Requiem Animation",
   "scripts": {
     "start": "electron ."
   },
   "author": "Thomas Barrett and Ozaner Hansha",
   "license": "GPL-3.0",
   "dependencies": {
+    "electron": "^1.8.2",
     "animejs": "^2.2.0",
-    "electron": "^1.7.11",
     "jquery": "^3.3.1"
   },
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
     "grunt-babel": "^7.0.0"
   }
 }

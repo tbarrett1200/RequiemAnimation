@@ -10,6 +10,8 @@ body {
   overflow: hidden;
   position: relative;
   margin: auto;
+  text-align: center;
+  line-height: 550px;
 }
 
 div.block {
@@ -29,4 +31,9 @@ div.image {
   bottom: 1vw;
   top: 1vw;
   background: rgb(160, 209, 231);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 60px;
 }
