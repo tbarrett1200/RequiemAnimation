@@ -5,13 +5,12 @@ body {
 }
 
 #screen {
-  width: 800px;
-  height: 600px;
+  width: 133vh;
+  height: 100vh;
   overflow: hidden;
   position: relative;
   margin: auto;
   text-align: center;
-  line-height: 550px;
 }
 
 div.block {
@@ -26,14 +25,16 @@ div.block {
 
 div.image {
   position: absolute;
-  left: 1vw;
-  right: 1vw;
-  bottom: 1vw;
-  top: 1vw;
-  background: rgb(160, 209, 231);
+  left: 1vh;
+  right: 1vh;
+  bottom: 1vh;
+  top: 1vh;
 }
 
 h1 {
   font-family: 'Playfair Display', serif;
   font-size: 60px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }

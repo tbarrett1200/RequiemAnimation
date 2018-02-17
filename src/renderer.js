@@ -12,8 +12,8 @@ let images = [];
 
 (async function main () {
   loadOptions()
-  for (movement = 0; movement < 14; movement++) {
-    await nameAction(opts.movements[movement])
+  for (movement = 1; movement <= 14; movement++) {
+    await nameAction(opts.movements[movement - 1])
     await initGrid()
     await loop()
     await deinitGrid()
@@ -52,13 +52,13 @@ async function nameAction (name) {
 }
 
 async function loadOptions () {
-  opts = JSON.parse(fs.readFileSync('options.json'))
+  opts = JSON.parse(fs.readFileSync(`${process.resourcesPath}/app/options.json`))
   console.log(opts)
   opts.movements.forEach((m, i) => {
     images.push([])
-    fs.readdirSync(`img/${i}`).forEach(img => {
-      if (path.extname(img) === '.jpg') {
-        images[i].push(`img/${i}/${img}`)
+    fs.readdirSync(`${process.resourcesPath}/app/img/${i+1}`).forEach(img => {
+      if (path.extname(img) === '.jpg' && path.basename(img)[0] !== '.') {
+        images[i].push(`img/${i+1}/${img}`)
       }
     })
   })
@@ -75,10 +75,10 @@ function makeSquare (row, col, roff = 0, coff = 0, scale = 1) {
 
   let block = $(`<div class='block col${col} row${row}'>`)
   block.css({
-    'width': `${opts.size * scale}px`,
-    'height': `${opts.size * scale}px`,
-    'left': `${opts.size * (col + coff)}px`,
-    'top': `${opts.size * (row + roff)}px`,
+    'width': `${opts.size * scale}vh`,
+    'height': `${opts.size * scale}vh`,
+    'left': `${opts.size * (col + coff)}vh`,
+    'top': `${opts.size * (row + roff)}vh`,
     'z-index': scale
   })
 
@@ -178,7 +178,7 @@ async function colAction (cols, dir) {
     await anime({
       targets: classes,
       translateX: '+=0',
-      translateY: '+=' + dir * opts.rows * opts.size,
+      translateY: `+= ${dir * opts.rows * opts.size}vh`,
       duration: 2000,
       easing: 'easeInOutQuad'
     }).finished
@@ -196,7 +196,7 @@ async function rowAction (rows, dir) {
     createRow(rows, dir)
     await anime({
       targets: classes,
-      translateX: '+=' + dir * opts.cols * opts.size,
+      translateX: `+= ${dir * opts.cols * opts.size}vh`,
       translateY: '+=0',
       duration: 2000,
       easing: 'easeInOutQuad'
@@ -206,34 +206,6 @@ async function rowAction (rows, dir) {
   } catch (error) {
     console.log(error)
   }
-}
-
-async function fadeAction () {
-  try {
-    let toBeAnimated = []
-    let childs = Array.from($('#screen').children().children())
-    for (let i = 0; i < childs.length; i++) {
-      if (anime.random(0, 4) === 0) {
-        toBeAnimated.push(childs[i])
-      }
-    }
-    await anime({
-      targets: toBeAnimated,
-      opacity: 0,
-      duration: 1000,
-      easing: 'easeInOutQuad'
-    }).finished
-    toBeAnimated.forEach(e => {
-      e.style['background-image'] = `url("img/${++imgnum % 11}.jpg")`
-      e.style['background-position'] = `${anime.random(0, 80)}% ${anime.random(0, 80)}%`
-    })
-    await anime({
-      targets: toBeAnimated,
-      opacity: 1,
-      duration: 1000,
-      easing: 'easeInOutQuad'
-    }).finished
-  } catch (error) {}
 }
 
 function range (start, end, step = 1) {
